@@ -66,54 +66,83 @@ function Header() {
 }
 
 function Menu() {
+  const pizzas = pizzaData;
   return (
     <main className='menu'>
       <h2>Our menu</h2>
-      <Pizza
-        name='Pizzaa Spinaci'
-        ingredients='Tomato, mozarella, and pepperoni'
-        photoName="pizzas/spinaci.jpg"
-        price={10}
-      />
+      {pizzas.length > 0 && (
+        <ul className='pizzas'>
+          {pizzaData.map((pizza) => {
+            return <Pizza key={pizza.name} pizza={pizza} />;
+          })}
+        </ul>
+      )}
     </main>
   );
 }
 
-function Pizza(props) {
-  const { name, ingredients, photoName, price } = props;
+function Pizza({ pizza }) {
+  const { name, ingredients, photoName, price, soldOut } = pizza;
+  if (soldOut) return
   return (
-    <div className='pizza'>
-      <img src={ photoName } alt={ name } />
+    <li className='pizza'>
+      <img src={photoName} alt={name} />
       <div>
-        <h1>{ name }</h1>
-        <p>{ ingredients }</p>
-        <span>{ price }</span>
+        <h1>{name}</h1>
+        <p>{ingredients}</p>
+        <span>{convertPriceFormat('pt-BR', 'BRL', price)}</span>
       </div>
-    </div>
+    </li>
   );
 }
 
 function Footer() {
   const workingHours = {
     currentHour: new Date().getHours(),
-    openHour: 12,
+    openHour: 21,
     closeHour: 22,
-    closeMessage: "We're currently open!",
-    openMessage: "Sorry we're closed",
+    openMessage() {
+      return `We're currently open until ${this.closeHour}:00. Come visit us or order online`;
+    },
+    closeMessage() {
+      return "Sorry we're closed";
+    },
+    isOpen() {
+      return (
+        this.currentHour >= this.openHour && this.currentHour <= this.closeHour
+      );
+    },
     checkOpeningStatus() {
-      const status =
-        this.openHour >= this.currentHour && this.openHour <= this.currentHour
-          ? this.openMessage
-          : this.closeMessage;
-      return status;
+      return this.isOpen() ? this.openMessage() : this.closeMessage();
     },
   };
   return (
     <footer className='footer'>
-      {new Date().toLocaleTimeString()}. {workingHours.checkOpeningStatus()}
+      {workingHours.isOpen() && <Order status={workingHours.checkOpeningStatus()} />}
+
+      {!workingHours.isOpen() && (
+        <div className='order'>
+          <p>{new Date().toLocaleTimeString()}. {workingHours.checkOpeningStatus()}</p>
+          <button className='btn'>Order</button>
+        </div>
+      )}
     </footer>
   );
   // return React.createElement('footer', null, "We're currently open!");
+}
+
+function Order({ status }) {
+  return (
+    <div className='order'>
+    {new Date().toLocaleTimeString()}. { status }
+  </div>
+  );
+}
+
+function convertPriceFormat(local, currency, value) {
+  return new Intl.NumberFormat(local, { style: 'currency', currency }).format(
+    value
+  );
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
