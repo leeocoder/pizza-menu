@@ -71,11 +71,17 @@ function Menu() {
     <main className='menu'>
       <h2>Our menu</h2>
       {pizzas.length > 0 && (
-        <ul className='pizzas'>
-          {pizzaData.map((pizza) => {
-            return <Pizza key={pizza.name} pizza={pizza} />;
-          })}
-        </ul>
+        <>
+          <p>
+            Authentic Italian cuisine. 6 creative dishes to choose from. All
+            from our stone oven, all organic, all delicious.
+          </p>
+          <ul className='pizzas'>
+            {pizzaData.map((pizza) => {
+              return <Pizza key={pizza.name} pizza={pizza} />;
+            })}
+          </ul>
+        </>
       )}
     </main>
   );
@@ -83,14 +89,13 @@ function Menu() {
 
 function Pizza({ pizza }) {
   const { name, ingredients, photoName, price, soldOut } = pizza;
-  if (soldOut) return
   return (
-    <li className='pizza'>
+    <li className={`pizza ${soldOut && 'sold-out'}`}>
       <img src={photoName} alt={name} />
       <div>
         <h1>{name}</h1>
         <p>{ingredients}</p>
-        <span>{convertPriceFormat('pt-BR', 'BRL', price)}</span>
+        <span>{soldOut ? "Sold Out".toUpperCase() : convertPriceFormat('pt-BR', 'BRL', price)}</span>
       </div>
     </li>
   );
@@ -118,11 +123,16 @@ function Footer() {
   };
   return (
     <footer className='footer'>
-      {workingHours.isOpen() && <Order status={workingHours.checkOpeningStatus()} />}
+      {workingHours.isOpen() && (
+        <Order status={workingHours.checkOpeningStatus()} />
+      )}
 
       {!workingHours.isOpen() && (
         <div className='order'>
-          <p>{new Date().toLocaleTimeString()}. {workingHours.checkOpeningStatus()}</p>
+          <p>
+            {new Date().toLocaleTimeString()}.{' '}
+            {workingHours.checkOpeningStatus()}
+          </p>
           <button className='btn'>Order</button>
         </div>
       )}
@@ -134,8 +144,8 @@ function Footer() {
 function Order({ status }) {
   return (
     <div className='order'>
-    {new Date().toLocaleTimeString()}. { status }
-  </div>
+      {new Date().toLocaleTimeString()}. {status}
+    </div>
   );
 }
 
